@@ -51,24 +51,19 @@
   .gen-btn:active { transform: scale(0.99); }
   .output-section { display: none; }
   .output-section.visible { display: block; }
-
   .run-card { background: var(--surface); border: 1px solid rgba(179,240,212,0.2); border-radius: 12px; padding: 24px; margin-bottom: 1.5rem; }
   .run-card h3 { font-size: 14px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
   .run-card p { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
   .run-card p code { font-family: var(--mono); font-size: 12px; background: var(--surface2); padding: 2px 7px; border-radius: 4px; color: var(--accent); }
-
   .download-btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; background: var(--accent-dim2); border: 1px solid rgba(179,240,212,0.3); border-radius: 9px; color: var(--accent); font-family: var(--mono); font-size: 13px; letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s, border-color 0.15s; text-decoration: none; }
   .download-btn:hover { background: rgba(179,240,212,0.22); border-color: rgba(179,240,212,0.5); }
   .download-btn:active { transform: scale(0.98); }
-  .download-icon { font-size: 15px; }
-
   .step-list { list-style: none; counter-reset: steps; display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
   .step-list li { counter-increment: steps; display: flex; align-items: flex-start; gap: 12px; font-size: 13px; color: var(--muted); line-height: 1.6; }
   .step-list li::before { content: counter(steps); display: flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border2); font-family: var(--mono); font-size: 10px; color: var(--accent); margin-top: 1px; }
   .step-list li strong { color: var(--text); font-weight: 400; }
   .step-list li code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
-
-  .details-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .details-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 1rem; }
   .details-toggle { width: 100%; padding: 14px 20px; background: none; border: none; color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-align: left; display: flex; align-items: center; justify-content: space-between; }
   .details-toggle:hover { color: var(--text); }
   .details-toggle .arrow { transition: transform 0.2s; display: inline-block; }
@@ -76,13 +71,11 @@
   .script-preview { display: none; padding: 18px; border-top: 1px solid var(--border); }
   .script-preview.visible { display: block; }
   .script-box { background: var(--surface2); border-radius: 8px; padding: 16px; font-family: var(--mono); font-size: 11px; line-height: 1.7; color: #b8c0cc; overflow-x: auto; white-space: pre; max-height: 300px; overflow-y: auto; }
-
-  .troubleshoot { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 1rem; }
+  .troubleshoot { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
   .troubleshoot p { font-size: 13px; color: var(--muted); line-height: 1.8; margin-bottom: 8px; }
   .troubleshoot p:last-child { margin-bottom: 0; }
   .troubleshoot strong { color: var(--text); font-weight: 400; }
   .troubleshoot code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 2px 6px; border-radius: 4px; color: var(--accent); }
-
   @media (max-width: 520px) { .two-col, .three-col { grid-template-columns: 1fr; } h1 { font-size: 24px; } }
 </style>
 </head>
@@ -92,7 +85,7 @@
   <header>
     <div class="eyebrow">macOS tool</div>
     <h1>iMessage Extractor</h1>
-    <p class="desc">Configure your contacts, download the script, then run it in Terminal. Each contact gets its own file. No copy-paste required.</p>
+    <p class="desc">Full two-way conversations merged across SMS and iMessage — each contact gets its own file in chronological order.</p>
   </header>
 
   <div class="section">
@@ -180,7 +173,7 @@
       <h3>Your script is ready</h3>
       <p>Download it, then run it in Terminal with: <code>python3 ~/Downloads/imessage_extract.py</code></p>
       <a class="download-btn" id="download-btn" download="imessage_extract.py">
-        <span class="download-icon">↓</span> Download imessage_extract.py
+        <span>↓</span> Download imessage_extract.py
       </a>
       <ul class="step-list">
         <li><strong>Download</strong> the file above</li>
@@ -200,6 +193,7 @@
     </div>
 
     <div class="troubleshoot">
+      <p><strong>SMS + iMessage merged:</strong> The script automatically finds all handles for each number (both SMS and iMessage) and merges them into one chronological file.</p>
       <p><strong>Permission error?</strong> Go to <strong>System Settings → Privacy & Security → Full Disk Access</strong>, add Terminal, then quit and reopen it before running again.</p>
       <p><strong>0 messages returned?</strong> Try the number without the <code>+1</code> prefix, or use the contact's Apple ID email address instead.</p>
       <p><strong>Missing old messages?</strong> In Messages app go to <strong>Messages → Settings → iMessage</strong>, enable "Messages in iCloud", scroll back in the conversation to trigger sync, then re-run.</p>
@@ -212,7 +206,6 @@
 
 <script>
 var rowId = 0;
-var lastScript = '';
 
 function addRow(phone, label) {
   rowId++;
@@ -267,13 +260,31 @@ function generate() {
 
   var maskFn;
   if (mask === 'label') {
-    maskFn = 'def mask_number(phone, label, idx):\n    if label:\n        return label\n    if len(phone) <= 3:\n        return phone\n    return phone[0:2] + "*" * (len(phone) - 3) + phone[-1]';
+    maskFn = [
+      'def mask_number(phone, label, idx):',
+      '    if label:',
+      '        return label',
+      '    if len(phone) <= 3:',
+      '        return phone',
+      '    return phone[0:2] + "*" * (len(phone) - 3) + phone[-1]'
+    ].join('\n');
   } else if (mask === 'partial') {
-    maskFn = 'def mask_number(phone, label, idx):\n    if len(phone) <= 3:\n        return phone\n    return phone[0:2] + "*" * (len(phone) - 3) + phone[-1]';
+    maskFn = [
+      'def mask_number(phone, label, idx):',
+      '    if len(phone) <= 3:',
+      '        return phone',
+      '    return phone[0:2] + "*" * (len(phone) - 3) + phone[-1]'
+    ].join('\n');
   } else if (mask === 'full') {
-    maskFn = 'def mask_number(phone, label, idx):\n    return "CONTACT_" + str(idx + 1)';
+    maskFn = [
+      'def mask_number(phone, label, idx):',
+      '    return "CONTACT_" + str(idx + 1)'
+    ].join('\n');
   } else {
-    maskFn = 'def mask_number(phone, label, idx):\n    return phone';
+    maskFn = [
+      'def mask_number(phone, label, idx):',
+      '    return phone'
+    ].join('\n');
   }
 
   var decodeFn = [
@@ -322,33 +333,68 @@ function generate() {
     '    if row_text and row_text.strip():',
     '        return row_text.strip()',
     '    decoded = decode_attributed_body(attributed_body)',
-    '    return decoded if decoded else ""',
+    '    return decoded if decoded else ""'
   ].join('\n');
 
-  var attachSelect = incAttach ? ',\n            GROUP_CONCAT(a.filename) as attachments' : '';
-  var attachJoin = incAttach
-    ? '\n        LEFT JOIN message_attachment_join maj ON m.ROWID = maj.message_id\n        LEFT JOIN attachment a ON maj.attachment_id = a.ROWID'
-    : '';
-  var attachColIdx = 4;
-
-  var query = [
-    '        SELECT',
-    '            datetime(m.date/1000000000 + 978307200, \'unixepoch\', \'localtime\') as ts,',
-    '            m.is_from_me,',
-    '            COALESCE(m.text, \'\') as text,',
-    '            m.attributedBody' + (incAttach ? ',' : ''),
-    incAttach ? '            GROUP_CONCAT(a.filename) as attachments' : null,
-    '        FROM message m',
-    '        JOIN chat_message_join cmj ON m.ROWID = cmj.message_id',
-    '        JOIN chat c ON cmj.chat_id = c.ROWID',
-    '        JOIN chat_handle_join chj ON c.ROWID = chj.chat_id',
-    '        JOIN handle h ON chj.handle_id = h.ROWID',
-    incAttach ? '        LEFT JOIN message_attachment_join maj ON m.ROWID = maj.message_id' : null,
-    incAttach ? '        LEFT JOIN attachment a ON maj.attachment_id = a.ROWID' : null,
+  // Key: find ALL handles matching the number (SMS + iMessage + email variants)
+  // then union all their messages and sort by date
+  var fetchFn = [
+    'def fetch_messages(cur, phone):',
+    '    """Find all handles for this contact (SMS, iMessage, email) and merge messages."""',
+    '    # Strip formatting to do a suffix match — catches +1XXXXXXXXXX and XXXXXXXXXX',
+    '    digits = "".join(c for c in phone if c.isdigit())',
+    '    suffix = digits[-10:] if len(digits) >= 10 else digits',
+    '',
+    '    # Find every handle whose id ends with these digits OR matches exactly',
+    '    cur.execute("""',
+    '        SELECT DISTINCT h.id',
+    '        FROM handle h',
     '        WHERE h.id = ?',
-    '        GROUP BY m.ROWID',
-    '        ORDER BY m.date ASC'
+    '           OR h.id LIKE ?',
+    '           OR replace(replace(replace(h.id, "+", ""), "-", ""), " ", "") LIKE ?',
+    '    """, (phone, "%" + suffix, "%" + suffix))',
+    '    handles = [row[0] for row in cur.fetchall()]',
+    '',
+    '    if not handles:',
+    '        return []',
+    '',
+    '    all_rows = []',
+    '    seen_ids = set()',
+    '    for handle_id in handles:',
+    '        cur.execute("""',
+    '            SELECT',
+    '                m.date,',
+    '                datetime(m.date/1000000000 + 978307200, "unixepoch", "localtime") as ts,',
+    '                m.is_from_me,',
+    '                COALESCE(m.text, "") as text,',
+    '                m.attributedBody,' + (incAttach ? '' : ''),
+    incAttach
+      ? '                GROUP_CONCAT(a.filename) as attachments,'
+      : null,
+    '                m.ROWID',
+    '            FROM message m',
+    '            JOIN chat_message_join cmj ON m.ROWID = cmj.message_id',
+    '            JOIN chat c ON cmj.chat_id = c.ROWID',
+    '            JOIN chat_handle_join chj ON c.ROWID = chj.chat_id',
+    '            JOIN handle h ON chj.handle_id = h.ROWID',
+    incAttach ? '            LEFT JOIN message_attachment_join maj ON m.ROWID = maj.message_id' : null,
+    incAttach ? '            LEFT JOIN attachment a ON maj.attachment_id = a.ROWID' : null,
+    '            WHERE h.id = ?',
+    '            GROUP BY m.ROWID',
+    '            ORDER BY m.date ASC',
+    '        """, (handle_id,))',
+    '        for row in cur.fetchall():',
+    '            msg_id = row[-1]  # ROWID is last column',
+    '            if msg_id not in seen_ids:',
+    '                seen_ids.add(msg_id)',
+    '                all_rows.append(row)',
+    '',
+    '    # Sort all merged messages by date (first column)',
+    '    all_rows.sort(key=lambda r: r[0])',
+    '    return all_rows'
   ].filter(function(l){ return l !== null; }).join('\n');
+
+  var attachColIdx = incAttach ? 5 : 4; // date, ts, is_from_me, text, attributedBody, [attachments], ROWID
 
   var attachTxtBlock = incAttach ? [
     '',
@@ -363,117 +409,94 @@ function generate() {
     ? '\n            out_row.append(row[' + attachColIdx + '] if len(row) > ' + attachColIdx + ' and row[' + attachColIdx + '] else "")'
     : '';
 
-  var lines;
-  if (format === 'txt') {
-    lines = [
-      'import sqlite3, os',
-      '',
-      'contacts = ' + contactsJson,
-      '',
-      'MY_NAME = "' + myname + '"',
-      'outdir = os.path.expanduser("' + outdir + '")',
-      'os.makedirs(outdir, exist_ok=True)',
-      '',
-      maskFn,
-      '',
-      decodeFn,
-      '',
-      'db = os.path.expanduser("~/Library/Messages/chat.db")',
-      'conn = sqlite3.connect(db)',
-      'cur = conn.cursor()',
-      '',
-      'for idx, c in enumerate(contacts):',
-      '    phone = c["phone"]',
-      '    label = c["label"]',
-      '    masked = mask_number(phone, label, idx)',
-      '    safe = (label if label else masked).replace("/", "-").replace(" ", "_")',
-      '    output = os.path.join(outdir, safe + ".txt")',
-      '',
-      '    cur.execute("""',
-      query,
-      '    """, (phone,))',
-      '    rows = cur.fetchall()',
-      '',
-      '    with open(output, "w", encoding="utf-8") as f:',
-      '        f.write("=" * 60 + "\\n")',
-      '        f.write(f"CONVERSATION WITH: {masked}\\n")',
-      '        f.write(f"TOTAL MESSAGES: {len(rows)}\\n")',
-      '        f.write("=" * 60 + "\\n\\n")',
-      '        if not rows:',
-      '            f.write("  [No messages found — check number format]\\n\\n")',
-      '        else:',
-      '            for row in rows:',
-      '                ts = row[0]',
-      '                is_from_me = row[1]',
-      '                text = get_text(row[2], row[3])',
-      '                sender = MY_NAME if is_from_me else masked',
-      '                f.write(f"[{ts}] {sender}:\\n")',
-      '                if text:',
-      '                    f.write(f"  {text}\\n")',
-      '                else:',
-      '                    f.write("  [no text content]\\n")',
-      attachTxtBlock,
-      '                f.write("\\n")',
-      '    print(f"Saved: {output} ({len(rows)} messages)")',
-      '',
-      'conn.close()',
-      'print("\\nAll done.")'
-    ].filter(function(l){ return l !== null; });
-  } else {
-    lines = [
-      'import sqlite3, os, csv',
-      '',
-      'contacts = ' + contactsJson,
-      '',
-      'MY_NAME = "' + myname + '"',
-      'outdir = os.path.expanduser("' + outdir + '")',
-      'os.makedirs(outdir, exist_ok=True)',
-      '',
-      maskFn,
-      '',
-      decodeFn,
-      '',
-      'db = os.path.expanduser("~/Library/Messages/chat.db")',
-      'conn = sqlite3.connect(db)',
-      'cur = conn.cursor()',
-      '',
-      'for idx, c in enumerate(contacts):',
-      '    phone = c["phone"]',
-      '    label = c["label"]',
-      '    masked = mask_number(phone, label, idx)',
-      '    safe = (label if label else masked).replace("/", "-").replace(" ", "_")',
-      '    output = os.path.join(outdir, safe + ".csv")',
-      '',
-      '    cur.execute("""',
-      query,
-      '    """, (phone,))',
-      '    rows = cur.fetchall()',
-      '',
-      '    with open(output, "w", newline="", encoding="utf-8") as f:',
-      '        w = csv.writer(f)',
-      '        headers = ["Timestamp", "Sender", "Message"]' + (incAttach ? '\n        headers.append("Attachments")' : ''),
-      '        w.writerow(headers)',
-      '        for row in rows:',
-      '            ts = row[0]',
-      '            is_from_me = row[1]',
-      '            text = get_text(row[2], row[3])',
-      '            sender = MY_NAME if is_from_me else masked',
-      '            out_row = [ts, sender, text]' + attachCsvVal,
-      '            w.writerow(out_row)',
-      '    print(f"Saved: {output} ({len(rows)} messages)")',
-      '',
-      'conn.close()',
-      'print("\\nAll done.")'
-    ];
-  }
+  var mainTxt = [
+    'for idx, c in enumerate(contacts):',
+    '    phone = c["phone"]',
+    '    label = c["label"]',
+    '    masked = mask_number(phone, label, idx)',
+    '    safe = (label if label else masked).replace("/", "-").replace(" ", "_")',
+    '    output = os.path.join(outdir, safe + ".txt")',
+    '',
+    '    rows = fetch_messages(cur, phone)',
+    '',
+    '    with open(output, "w", encoding="utf-8") as f:',
+    '        f.write("=" * 60 + "\\n")',
+    '        f.write(f"CONVERSATION WITH: {masked}\\n")',
+    '        f.write(f"TOTAL MESSAGES: {len(rows)}\\n")',
+    '        f.write("=" * 60 + "\\n\\n")',
+    '        if not rows:',
+    '            f.write("  [No messages found — check number format]\\n\\n")',
+    '        else:',
+    '            for row in rows:',
+    '                ts = row[1]',
+    '                is_from_me = row[2]',
+    '                text = get_text(row[3], row[4])',
+    '                sender = MY_NAME if is_from_me else masked',
+    '                f.write(f"[{ts}] {sender}:\\n")',
+    '                if text:',
+    '                    f.write(f"  {text}\\n")',
+    '                else:',
+    '                    f.write("  [no text content]\\n")',
+    attachTxtBlock,
+    '                f.write("\\n")',
+    '    print(f"Saved: {output} ({len(rows)} messages)")'
+  ].filter(function(l){ return l !== null; }).join('\n');
 
-  var script = lines.join('\n');
-  lastScript = script;
+  var mainCsv = [
+    'for idx, c in enumerate(contacts):',
+    '    phone = c["phone"]',
+    '    label = c["label"]',
+    '    masked = mask_number(phone, label, idx)',
+    '    safe = (label if label else masked).replace("/", "-").replace(" ", "_")',
+    '    output = os.path.join(outdir, safe + ".csv")',
+    '',
+    '    rows = fetch_messages(cur, phone)',
+    '',
+    '    with open(output, "w", newline="", encoding="utf-8") as f:',
+    '        w = csv.writer(f)',
+    '        headers = ["Timestamp", "Sender", "Message"]' + (incAttach ? '\n        headers.append("Attachments")' : ''),
+    '        w.writerow(headers)',
+    '        for row in rows:',
+    '            ts = row[1]',
+    '            is_from_me = row[2]',
+    '            text = get_text(row[3], row[4])',
+    '            sender = MY_NAME if is_from_me else masked',
+    '            out_row = [ts, sender, text]' + attachCsvVal,
+    '            w.writerow(out_row)',
+    '    print(f"Saved: {output} ({len(rows)} messages)")'
+  ].join('\n');
 
-  // Show script in preview
+  var imports = format === 'csv' ? 'import sqlite3, os, csv' : 'import sqlite3, os';
+
+  var scriptLines = [
+    imports,
+    '',
+    'contacts = ' + contactsJson,
+    '',
+    'MY_NAME = "' + myname + '"',
+    'outdir = os.path.expanduser("' + outdir + '")',
+    'os.makedirs(outdir, exist_ok=True)',
+    '',
+    maskFn,
+    '',
+    decodeFn,
+    '',
+    fetchFn,
+    '',
+    'db = os.path.expanduser("~/Library/Messages/chat.db")',
+    'conn = sqlite3.connect(db)',
+    'cur = conn.cursor()',
+    '',
+    format === 'txt' ? mainTxt : mainCsv,
+    '',
+    'conn.close()',
+    'print("\\nAll done.")'
+  ];
+
+  var script = scriptLines.join('\n');
+
   document.getElementById('script-box').textContent = script;
 
-  // Create a Blob and wire up the download button
   var blob = new Blob([script], {type: 'text/plain'});
   var url = URL.createObjectURL(blob);
   var btn = document.getElementById('download-btn');
