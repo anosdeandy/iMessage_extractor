@@ -30,7 +30,8 @@
   input[type=text], select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: var(--mono); font-size: 13px; color: var(--text); outline: none; transition: border-color 0.15s; -webkit-appearance: none; }
   input[type=text]:focus, select:focus { border-color: var(--border2); }
   select { cursor: pointer; } select option { background: var(--surface2); }
-  .hint { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 7px; line-height: 1.5; }
+  .hint { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 7px; line-height: 1.6; }
+  .hint code { background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
   .radio-group, .check-group { display: flex; flex-direction: column; gap: 10px; }
@@ -50,16 +51,38 @@
   .gen-btn:active { transform: scale(0.99); }
   .output-section { display: none; }
   .output-section.visible { display: block; }
-  .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .output-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--accent2); text-transform: uppercase; }
-  .copy-btn { font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; cursor: pointer; transition: color 0.15s, border-color 0.15s; }
-  .copy-btn:hover { color: var(--text); border-color: var(--border2); }
-  .script-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 18px; font-family: var(--mono); font-size: 12px; line-height: 1.7; color: #b8c0cc; overflow-x: auto; white-space: pre; max-height: 380px; overflow-y: auto; margin-bottom: 14px; }
-  .instructions { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
-  .instructions p { font-size: 13px; color: var(--muted); line-height: 1.8; margin-bottom: 10px; }
-  .instructions p:last-child { margin-bottom: 0; }
-  .instructions strong { color: var(--text); font-weight: 400; }
-  .instructions code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 2px 6px; border-radius: 4px; color: var(--accent); }
+
+  .run-card { background: var(--surface); border: 1px solid rgba(179,240,212,0.2); border-radius: 12px; padding: 24px; margin-bottom: 1.5rem; }
+  .run-card h3 { font-size: 14px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
+  .run-card p { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+  .run-card p code { font-family: var(--mono); font-size: 12px; background: var(--surface2); padding: 2px 7px; border-radius: 4px; color: var(--accent); }
+
+  .download-btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; background: var(--accent-dim2); border: 1px solid rgba(179,240,212,0.3); border-radius: 9px; color: var(--accent); font-family: var(--mono); font-size: 13px; letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s, border-color 0.15s; text-decoration: none; }
+  .download-btn:hover { background: rgba(179,240,212,0.22); border-color: rgba(179,240,212,0.5); }
+  .download-btn:active { transform: scale(0.98); }
+  .download-icon { font-size: 15px; }
+
+  .step-list { list-style: none; counter-reset: steps; display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .step-list li { counter-increment: steps; display: flex; align-items: flex-start; gap: 12px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .step-list li::before { content: counter(steps); display: flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border2); font-family: var(--mono); font-size: 10px; color: var(--accent); margin-top: 1px; }
+  .step-list li strong { color: var(--text); font-weight: 400; }
+  .step-list li code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+
+  .details-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .details-toggle { width: 100%; padding: 14px 20px; background: none; border: none; color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-align: left; display: flex; align-items: center; justify-content: space-between; }
+  .details-toggle:hover { color: var(--text); }
+  .details-toggle .arrow { transition: transform 0.2s; display: inline-block; }
+  .details-toggle.open .arrow { transform: rotate(90deg); }
+  .script-preview { display: none; padding: 18px; border-top: 1px solid var(--border); }
+  .script-preview.visible { display: block; }
+  .script-box { background: var(--surface2); border-radius: 8px; padding: 16px; font-family: var(--mono); font-size: 11px; line-height: 1.7; color: #b8c0cc; overflow-x: auto; white-space: pre; max-height: 300px; overflow-y: auto; }
+
+  .troubleshoot { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 1rem; }
+  .troubleshoot p { font-size: 13px; color: var(--muted); line-height: 1.8; margin-bottom: 8px; }
+  .troubleshoot p:last-child { margin-bottom: 0; }
+  .troubleshoot strong { color: var(--text); font-weight: 400; }
+  .troubleshoot code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 2px 6px; border-radius: 4px; color: var(--accent); }
+
   @media (max-width: 520px) { .two-col, .three-col { grid-template-columns: 1fr; } h1 { font-size: 24px; } }
 </style>
 </head>
@@ -69,7 +92,7 @@
   <header>
     <div class="eyebrow">macOS tool</div>
     <h1>iMessage Extractor</h1>
-    <p class="desc">Full two-way conversations — your messages and theirs, in order. Each contact gets its own file. Handles blank recent messages automatically.</p>
+    <p class="desc">Configure your contacts, download the script, then run it in Terminal. Each contact gets its own file. No copy-paste required.</p>
   </header>
 
   <div class="section">
@@ -85,7 +108,7 @@
       </div>
       <div id="contacts-list"></div>
       <button class="add-btn" onclick="addRow()">+ Add contact</button>
-      <p class="hint" style="margin-top:12px;">Label becomes the filename — e.g. "Sarah" → <code style="font-family:var(--mono);font-size:11px;color:var(--accent);">Sarah.txt</code>. Leave blank to use the masked number.</p>
+      <p class="hint" style="margin-top:12px;">Label becomes the filename — e.g. "Sarah" → <code>Sarah.txt</code>. Leave blank to use the masked number.</p>
     </div>
   </div>
 
@@ -152,24 +175,44 @@
   <button class="gen-btn" onclick="generate()">→ Generate script</button>
 
   <div class="output-section" id="output-section">
-    <div class="output-header">
-      <span class="output-label">Terminal script</span>
-      <button class="copy-btn" onclick="copyScript()" id="copy-btn">Copy</button>
+
+    <div class="run-card">
+      <h3>Your script is ready</h3>
+      <p>Download it, then run it in Terminal with: <code>python3 ~/Downloads/imessage_extract.py</code></p>
+      <a class="download-btn" id="download-btn" download="imessage_extract.py">
+        <span class="download-icon">↓</span> Download imessage_extract.py
+      </a>
+      <ul class="step-list">
+        <li><strong>Download</strong> the file above</li>
+        <li>Open <strong>Terminal</strong> (Applications → Utilities → Terminal)</li>
+        <li>Run: <code>python3 ~/Downloads/imessage_extract.py</code></li>
+        <li>Find your output files in <strong id="outdir-display">~/Desktop/imessages</strong></li>
+      </ul>
     </div>
-    <div class="script-box" id="script-box"></div>
-    <div class="instructions">
-      <p><strong>How to run:</strong> Open Terminal (Applications → Utilities → Terminal), paste the script, and press Enter. A separate file is created for each contact.</p>
+
+    <div class="details-section">
+      <button class="details-toggle" id="details-toggle" onclick="toggleScript()">
+        View script &nbsp;<span class="arrow">▶</span>
+      </button>
+      <div class="script-preview" id="script-preview">
+        <div class="script-box" id="script-box"></div>
+      </div>
+    </div>
+
+    <div class="troubleshoot">
       <p><strong>Permission error?</strong> Go to <strong>System Settings → Privacy & Security → Full Disk Access</strong>, add Terminal, then quit and reopen it before running again.</p>
       <p><strong>0 messages returned?</strong> Try the number without the <code>+1</code> prefix, or use the contact's Apple ID email address instead.</p>
       <p><strong>Missing old messages?</strong> In Messages app go to <strong>Messages → Settings → iMessage</strong>, enable "Messages in iCloud", scroll back in the conversation to trigger sync, then re-run.</p>
-      <p><strong>Still seeing blanks?</strong> Those messages used Apple's newer binary format. The script decodes them automatically — if any still appear blank they are likely tapback reactions or empty system messages with no actual text content.</p>
+      <p><strong>Still seeing blanks?</strong> The script decodes Apple's newer binary message format automatically. Any remaining blanks are tapbacks or system messages with no text content.</p>
     </div>
+
   </div>
 
 </div>
 
 <script>
 var rowId = 0;
+var lastScript = '';
 
 function addRow(phone, label) {
   rowId++;
@@ -200,6 +243,14 @@ function getContacts() {
   return out;
 }
 
+function toggleScript() {
+  var preview = document.getElementById('script-preview');
+  var toggle = document.getElementById('details-toggle');
+  var isOpen = preview.classList.contains('visible');
+  preview.classList.toggle('visible', !isOpen);
+  toggle.classList.toggle('open', !isOpen);
+}
+
 function generate() {
   var contacts = getContacts();
   if (!contacts.length) { alert('Please add at least one contact.'); return; }
@@ -209,6 +260,8 @@ function generate() {
   var format = document.getElementById('format').value;
   var mask = document.querySelector('input[name=mask]:checked').value;
   var incAttach = document.getElementById('inc_attachments').checked;
+
+  document.getElementById('outdir-display').textContent = outdir;
 
   var contactsJson = JSON.stringify(contacts, null, 4);
 
@@ -223,23 +276,16 @@ function generate() {
     maskFn = 'def mask_number(phone, label, idx):\n    return phone';
   }
 
-  // attributedBody decoder — handles blank recent messages
   var decodeFn = [
     'def decode_attributed_body(blob):',
-    '    """Extract plain text from NSAttributedString binary blob."""',
     '    if not blob:',
     '        return ""',
     '    try:',
-    '        # The text is stored as a UTF-8 string preceded by its length',
-    '        # Search for the streamtyped plist marker then find the NSString content',
     '        data = bytes(blob)',
-    '        # Try to find text after NSString marker',
-    '        marker = b\'NSString\'',
+    '        marker = b"NSString"',
     '        idx = data.find(marker)',
     '        if idx != -1:',
-    '            # After NSString, skip to the length-prefixed string',
     '            rest = data[idx + len(marker):]',
-    '            # Find the next non-zero length byte sequence',
     '            for i in range(len(rest) - 1):',
     '                if rest[i] == 0x01 and i + 1 < len(rest):',
     '                    length = rest[i + 1]',
@@ -251,7 +297,6 @@ function generate() {
     '                                return text',
     '                        except Exception:',
     '                            pass',
-    '        # Fallback: extract any readable UTF-8 strings >= 3 chars',
     '        result = []',
     '        i = 0',
     '        while i < len(data):',
@@ -267,7 +312,6 @@ function generate() {
     '            else:',
     '                i += 1',
     '        combined = " ".join(result)',
-    '        # Strip common binary garbage prefixes',
     '        for prefix in ["streamtyped", "NSMutableString", "NSString", "NSAttributedString", "NSObject", "NSColor", "NSFont"]:',
     '            combined = combined.replace(prefix, "")',
     '        return combined.strip() if len(combined.strip()) > 1 else ""',
@@ -282,10 +326,10 @@ function generate() {
   ].join('\n');
 
   var attachSelect = incAttach ? ',\n            GROUP_CONCAT(a.filename) as attachments' : '';
-  var attachJoin = incAttach ? '\n        LEFT JOIN message_attachment_join maj ON m.ROWID = maj.message_id\n        LEFT JOIN attachment a ON maj.attachment_id = a.ROWID' : '';
-  var groupBy = '\n        GROUP BY m.ROWID';
-
-  var attachColIdx = 4; // ts=0, is_from_me=1, text=2, attributed_body=3, attach=4
+  var attachJoin = incAttach
+    ? '\n        LEFT JOIN message_attachment_join maj ON m.ROWID = maj.message_id\n        LEFT JOIN attachment a ON maj.attachment_id = a.ROWID'
+    : '';
+  var attachColIdx = 4;
 
   var query = [
     '        SELECT',
@@ -315,13 +359,13 @@ function generate() {
     '                            f.write(f"  [attachment: {short}]\\n")'
   ].join('\n') : '';
 
-  var attachCsvVal = incAttach ? '\n            out_row.append(row[' + attachColIdx + '] if len(row) > ' + attachColIdx + ' and row[' + attachColIdx + '] else "")' : '';
+  var attachCsvVal = incAttach
+    ? '\n            out_row.append(row[' + attachColIdx + '] if len(row) > ' + attachColIdx + ' and row[' + attachColIdx + '] else "")'
+    : '';
 
-  var script = '';
-
+  var lines;
   if (format === 'txt') {
-    script = [
-      "python3 << 'EOF'",
+    lines = [
       'import sqlite3, os',
       '',
       'contacts = ' + contactsJson,
@@ -373,12 +417,10 @@ function generate() {
       '    print(f"Saved: {output} ({len(rows)} messages)")',
       '',
       'conn.close()',
-      'print("\\nAll done.")',
-      'EOF'
-    ].filter(function(l){ return l !== null; }).join('\n');
+      'print("\\nAll done.")'
+    ].filter(function(l){ return l !== null; });
   } else {
-    script = [
-      "python3 << 'EOF'",
+    lines = [
       'import sqlite3, os, csv',
       '',
       'contacts = ' + contactsJson,
@@ -421,23 +463,24 @@ function generate() {
       '    print(f"Saved: {output} ({len(rows)} messages)")',
       '',
       'conn.close()',
-      'print("\\nAll done.")',
-      'EOF'
-    ].join('\n');
+      'print("\\nAll done.")'
+    ];
   }
 
+  var script = lines.join('\n');
+  lastScript = script;
+
+  // Show script in preview
   document.getElementById('script-box').textContent = script;
+
+  // Create a Blob and wire up the download button
+  var blob = new Blob([script], {type: 'text/plain'});
+  var url = URL.createObjectURL(blob);
+  var btn = document.getElementById('download-btn');
+  btn.href = url;
+
   document.getElementById('output-section').classList.add('visible');
   document.getElementById('output-section').scrollIntoView({behavior: 'smooth', block: 'start'});
-}
-
-function copyScript() {
-  var text = document.getElementById('script-box').textContent;
-  navigator.clipboard.writeText(text).then(function() {
-    var btn = document.getElementById('copy-btn');
-    btn.textContent = 'Copied!';
-    setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
-  });
 }
 
 addRow('', '');
