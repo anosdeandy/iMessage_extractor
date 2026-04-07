@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iMessage Extractor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0e0e0f; --surface: #161618; --surface2: #1e1e21;
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+    --text: #e8e8e6; --muted: #888885;
+    --accent: #b3f0d4; --accent2: #7de0b5;
+    --accent-dim: rgba(179,240,212,0.08); --accent-dim2: rgba(179,240,212,0.15);
+    --mono: 'DM Mono', monospace; --sans: 'DM Sans', sans-serif;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; min-height: 100vh; padding: 3rem 1.5rem; }
+  .container { max-width: 680px; margin: 0 auto; }
+  header { margin-bottom: 3rem; }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--accent2); text-transform: uppercase; margin-bottom: 12px; }
+  h1 { font-size: 32px; font-weight: 300; letter-spacing: -0.02em; line-height: 1.2; color: var(--text); margin-bottom: 10px; }
+  .desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  .section { margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .section-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--surface); }
+  .step-num { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; }
+  .section-title { font-size: 13px; font-weight: 400; color: var(--text); }
+  .section-body { padding: 20px; background: var(--surface); }
+  label { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+  input[type=text], select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: var(--mono); font-size: 13px; color: var(--text); outline: none; transition: border-color 0.15s; -webkit-appearance: none; }
+  input[type=text]:focus, select:focus { border-color: var(--border2); }
+  select { cursor: pointer; } select option { background: var(--surface2); }
+  .hint { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 7px; line-height: 1.5; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .radio-group, .check-group { display: flex; flex-direction: column; gap: 10px; }
+  .radio-item, .check-item { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; color: var(--text); font-weight: 300; }
+  .radio-item input, .check-item input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+  .divider { height: 1px; background: var(--border); margin: 18px 0; }
+  .col-headers { display: grid; grid-template-columns: 1fr 1fr 36px; gap: 8px; margin-bottom: 5px; }
+  .col-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; }
+  #contacts-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .contact-row { display: grid; grid-template-columns: 1fr 1fr 36px; gap: 8px; align-items: center; }
+  .remove-btn { width: 36px; height: 38px; background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.15s, color 0.15s; flex-shrink: 0; line-height: 1; }
+  .remove-btn:hover { border-color: rgba(240,100,100,0.4); color: #f06464; }
+  .add-btn { font-family: var(--mono); font-size: 12px; letter-spacing: 0.05em; color: var(--accent2); background: var(--accent-dim); border: 1px solid rgba(179,240,212,0.15); border-radius: 8px; padding: 8px 14px; cursor: pointer; transition: background 0.15s; }
+  .add-btn:hover { background: var(--accent-dim2); }
+  .gen-btn { width: 100%; padding: 14px; background: var(--accent-dim); border: 1px solid rgba(179,240,212,0.2); border-radius: 10px; color: var(--accent); font-family: var(--mono); font-size: 13px; letter-spacing: 0.05em; cursor: pointer; transition: background 0.15s, border-color 0.15s; margin-bottom: 1.5rem; }
+  .gen-btn:hover { background: var(--accent-dim2); border-color: rgba(179,240,212,0.35); }
+  .gen-btn:active { transform: scale(0.99); }
+  .output-section { display: none; }
+  .output-section.visible { display: block; }
+  .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .output-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--accent2); text-transform: uppercase; }
+  .copy-btn { font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+  .copy-btn:hover { color: var(--text); border-color: var(--border2); }
+  .script-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 18px; font-family: var(--mono); font-size: 12px; line-height: 1.7; color: #b8c0cc; overflow-x: auto; white-space: pre; max-height: 380px; overflow-y: auto; margin-bottom: 14px; }
+  .instructions { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+  .instructions p { font-size: 13px; color: var(--muted); line-height: 1.8; margin-bottom: 10px; }
+  .instructions p:last-child { margin-bottom: 0; }
+  .instructions strong { color: var(--text); font-weight: 400; }
+  .instructions code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 2px 6px; border-radius: 4px; color: var(--accent); }
+  @media (max-width: 520px) { .two-col, .three-col { grid-template-columns: 1fr; } h1 { font-size: 24px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="eyebrow">macOS tool</div>
+    <h1>iMessage Extractor</h1>
+    <p class="desc">Full two-way conversations — your messages and theirs, in order. Each contact gets its own file. Handles blank recent messages automatically.</p>
+  </header>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="step-num">1</div>
+      <span class="section-title">Contacts</span>
+    </div>
+    <div class="section-body">
+      <div class="col-headers">
+        <div class="col-label">Phone number</div>
+        <div class="col-label">Name / label</div>
+        <div></div>
+      </div>
+      <div id="contacts-list"></div>
+      <button class="add-btn" onclick="addRow()">+ Add contact</button>
+      <p class="hint" style="margin-top:12px;">Label becomes the filename — e.g. "Sarah" → <code style="font-family:var(--mono);font-size:11px;color:var(--accent);">Sarah.txt</code>. Leave blank to use the masked number.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="step-num">2</div>
+      <span class="section-title">Output settings</span>
+    </div>
+    <div class="section-body">
+
+      <div class="three-col" style="margin-bottom:18px;">
+        <div>
+          <label>Your name</label>
+          <input type="text" id="myname" value="Andy" spellcheck="false" />
+        </div>
+        <div>
+          <label>Output folder</label>
+          <input type="text" id="outdir" value="~/Desktop/imessages" spellcheck="false" />
+        </div>
+        <div>
+          <label>Format</label>
+          <select id="format">
+            <option value="txt">Plain text (.txt)</option>
+            <option value="csv">CSV (.csv)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <label style="margin-bottom:12px;">How to show the contact's name inside the file</label>
+      <div class="radio-group">
+        <label class="radio-item">
+          <input type="radio" name="mask" value="label" checked>
+          Use label (or partial number if no label)
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="mask" value="partial">
+          Partial number &nbsp;<span style="color:var(--muted);font-family:var(--mono);font-size:11px;">+1*********7</span>
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="mask" value="full">
+          Fully masked &nbsp;<span style="color:var(--muted);font-family:var(--mono);font-size:11px;">CONTACT_1</span>
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="mask" value="none">
+          Full phone number
+        </label>
+      </div>
+
+      <div class="divider"></div>
+
+      <label style="margin-bottom:12px;">Include</label>
+      <div class="check-group">
+        <label class="check-item">
+          <input type="checkbox" id="inc_attachments" checked>
+          Note attachments inline
+        </label>
+      </div>
+
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generate()">→ Generate script</button>
+
+  <div class="output-section" id="output-section">
+    <div class="output-header">
+      <span class="output-label">Terminal script</span>
+      <button class="copy-btn" onclick="copyScript()" id="copy-btn">Copy</button>
+    </div>
+    <div class="script-box" id="script-box"></div>
+    <div class="instructions">
+      <p><strong>How to run:</strong> Open Terminal (Applications → Utilities → Terminal), paste the script, and press Enter. A separate file is created for each contact.</p>
+      <p><strong>Permission error?</strong> Go to <strong>System Settings → Privacy & Security → Full Disk Access</strong>, add Terminal, then quit and reopen it before running again.</p>
+      <p><strong>0 messages returned?</strong> Try the number without the <code>+1</code> prefix, or use the contact's Apple ID email address instead.</p>
+      <p><strong>Missing old messages?</strong> In Messages app go to <strong>Messages → Settings → iMessage</strong>, enable "Messages in iCloud", scroll back in the conversation to trigger sync, then re-run.</p>
+      <p><strong>Still seeing blanks?</strong> Those messages used Apple's newer binary format. The script decodes them automatically — if any still appear blank they are likely tapback reactions or empty system messages with no actual text content.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var rowId = 0;
+
+function addRow(phone, label) {
+  rowId++;
+  var id = rowId;
+  var div = document.createElement('div');
+  div.className = 'contact-row';
+  div.id = 'row-' + id;
+  div.innerHTML =
+    '<input type="text" class="phone-input" placeholder="+15551234567" value="' + (phone||'') + '" spellcheck="false" />' +
+    '<input type="text" class="label-input" placeholder="e.g. Sarah" value="' + (label||'') + '" spellcheck="false" />' +
+    '<button class="remove-btn" onclick="removeRow(' + id + ')">×</button>';
+  document.getElementById('contacts-list').appendChild(div);
+}
+
+function removeRow(id) {
+  var el = document.getElementById('row-' + id);
+  if (el) el.remove();
+}
+
+function getContacts() {
+  var rows = document.querySelectorAll('.contact-row');
+  var out = [];
+  rows.forEach(function(r) {
+    var phone = r.querySelector('.phone-input').value.trim();
+    var label = r.querySelector('.label-input').value.trim();
+    if (phone) out.push({phone: phone, label: label});
+  });
+  return out;
+}
+
+function generate() {
+  var contacts = getContacts();
+  if (!contacts.length) { alert('Please add at least one contact.'); return; }
+
+  var myname = document.getElementById('myname').value.trim() || 'Me';
+  var outdir = document.getElementById('outdir').value.trim() || '~/Desktop/imessages';
+  var format = document.getElementById('format').value;
+  var mask = document.querySelector('input[name=mask]:checked').value;
+  var incAttach = document.getElementById('inc_attachments').checked;
+
+  var contactsJson = JSON.stringify(contacts, null, 4);
+
+  var maskFn;
+  if (mask === 'label') {
+    maskFn = 'def mask_number(phone, label, idx):\n    if label:\n        return label\n    if len(phone) <= 3:\n        return phone\n    return phone[0:2] + "*" * (len(phone) - 3) + phone[-1]';
+  } else if (mask === 'partial') {
+    maskFn = 'def mask_number(phone, label, idx):\n    if len(phone) <= 3:\n        return phone\n    return phone[0:2] + "*" * (len(phone) - 3) + phone[-1]';
+  } else if (mask === 'full') {
+    maskFn = 'def mask_number(phone, label, idx):\n    return "CONTACT_" + str(idx + 1)';
+  } else {
+    maskFn = 'def mask_number(phone, label, idx):\n    return phone';
+  }
+
+  // attributedBody decoder — handles blank recent messages
+  var decodeFn = [
+    'def decode_attributed_body(blob):',
+    '    """Extract plain text from NSAttributedString binary blob."""',
+    '    if not blob:',
+    '        return ""',
+    '    try:',
+    '        # The text is stored as a UTF-8 string preceded by its length',
+    '        # Search for the streamtyped plist marker then find the NSString content',
+    '        data = bytes(blob)',
+    '        # Try to find text after NSString marker',
+    '        marker = b\'NSString\'',
+    '        idx = data.find(marker)',
+    '        if idx != -1:',
+    '            # After NSString, skip to the length-prefixed string',
+    '            rest = data[idx + len(marker):]',
+    '            # Find the next non-zero length byte sequence',
+    '            for i in range(len(rest) - 1):',
+    '                if rest[i] == 0x01 and i + 1 < len(rest):',
+    '                    length = rest[i + 1]',
+    '                    if length > 0 and i + 2 + length <= len(rest):',
+    '                        candidate = rest[i + 2: i + 2 + length]',
+    '                        try:',
+    '                            text = candidate.decode("utf-8")',
+    '                            if any(c.isprintable() for c in text):',
+    '                                return text',
+    '                        except Exception:',
+    '                            pass',
+    '        # Fallback: extract any readable UTF-8 strings >= 3 chars',
+    '        result = []',
+    '        i = 0',
+    '        while i < len(data):',
+    '            for length in range(min(512, len(data) - i), 2, -1):',
+    '                try:',
+    '                    chunk = data[i:i+length].decode("utf-8")',
+    '                    if len(chunk) >= 3 and all(c.isprintable() or c in "\\n\\t\\r" for c in chunk):',
+    '                        result.append(chunk)',
+    '                        i += length',
+    '                        break',
+    '                except Exception:',
+    '                    pass',
+    '            else:',
+    '                i += 1',
+    '        combined = " ".join(result)',
+    '        # Strip common binary garbage prefixes',
+    '        for prefix in ["streamtyped", "NSMutableString", "NSString", "NSAttributedString", "NSObject", "NSColor", "NSFont"]:',
+    '            combined = combined.replace(prefix, "")',
+    '        return combined.strip() if len(combined.strip()) > 1 else ""',
+    '    except Exception:',
+    '        return ""',
+    '',
+    'def get_text(row_text, attributed_body):',
+    '    if row_text and row_text.strip():',
+    '        return row_text.strip()',
+    '    decoded = decode_attributed_body(attributed_body)',
+    '    return decoded if decoded else ""',
+  ].join('\n');
+
+  var attachSelect = incAttach ? ',\n            GROUP_CONCAT(a.filename) as attachments' : '';
+  var attachJoin = incAttach ? '\n        LEFT JOIN message_attachment_join maj ON m.ROWID = maj.message_id\n        LEFT JOIN attachment a ON maj.attachment_id = a.ROWID' : '';
+  var groupBy = '\n        GROUP BY m.ROWID';
+
+  var attachColIdx = 4; // ts=0, is_from_me=1, text=2, attributed_body=3, attach=4
+
+  var query = [
+    '        SELECT',
+    '            datetime(m.date/1000000000 + 978307200, \'unixepoch\', \'localtime\') as ts,',
+    '            m.is_from_me,',
+    '            COALESCE(m.text, \'\') as text,',
+    '            m.attributedBody' + (incAttach ? ',' : ''),
+    incAttach ? '            GROUP_CONCAT(a.filename) as attachments' : null,
+    '        FROM message m',
+    '        JOIN chat_message_join cmj ON m.ROWID = cmj.message_id',
+    '        JOIN chat c ON cmj.chat_id = c.ROWID',
+    '        JOIN chat_handle_join chj ON c.ROWID = chj.chat_id',
+    '        JOIN handle h ON chj.handle_id = h.ROWID',
+    incAttach ? '        LEFT JOIN message_attachment_join maj ON m.ROWID = maj.message_id' : null,
+    incAttach ? '        LEFT JOIN attachment a ON maj.attachment_id = a.ROWID' : null,
+    '        WHERE h.id = ?',
+    '        GROUP BY m.ROWID',
+    '        ORDER BY m.date ASC'
+  ].filter(function(l){ return l !== null; }).join('\n');
+
+  var attachTxtBlock = incAttach ? [
+    '',
+    '                if len(row) > ' + attachColIdx + ' and row[' + attachColIdx + ']:',
+    '                    for fname in row[' + attachColIdx + '].split(","):',
+    '                        short = fname.split("/")[-1] if fname else ""',
+    '                        if short:',
+    '                            f.write(f"  [attachment: {short}]\\n")'
+  ].join('\n') : '';
+
+  var attachCsvVal = incAttach ? '\n            out_row.append(row[' + attachColIdx + '] if len(row) > ' + attachColIdx + ' and row[' + attachColIdx + '] else "")' : '';
+
+  var script = '';
+
+  if (format === 'txt') {
+    script = [
+      "python3 << 'EOF'",
+      'import sqlite3, os',
+      '',
+      'contacts = ' + contactsJson,
+      '',
+      'MY_NAME = "' + myname + '"',
+      'outdir = os.path.expanduser("' + outdir + '")',
+      'os.makedirs(outdir, exist_ok=True)',
+      '',
+      maskFn,
+      '',
+      decodeFn,
+      '',
+      'db = os.path.expanduser("~/Library/Messages/chat.db")',
+      'conn = sqlite3.connect(db)',
+      'cur = conn.cursor()',
+      '',
+      'for idx, c in enumerate(contacts):',
+      '    phone = c["phone"]',
+      '    label = c["label"]',
+      '    masked = mask_number(phone, label, idx)',
+      '    safe = (label if label else masked).replace("/", "-").replace(" ", "_")',
+      '    output = os.path.join(outdir, safe + ".txt")',
+      '',
+      '    cur.execute("""',
+      query,
+      '    """, (phone,))',
+      '    rows = cur.fetchall()',
+      '',
+      '    with open(output, "w", encoding="utf-8") as f:',
+      '        f.write("=" * 60 + "\\n")',
+      '        f.write(f"CONVERSATION WITH: {masked}\\n")',
+      '        f.write(f"TOTAL MESSAGES: {len(rows)}\\n")',
+      '        f.write("=" * 60 + "\\n\\n")',
+      '        if not rows:',
+      '            f.write("  [No messages found — check number format]\\n\\n")',
+      '        else:',
+      '            for row in rows:',
+      '                ts = row[0]',
+      '                is_from_me = row[1]',
+      '                text = get_text(row[2], row[3])',
+      '                sender = MY_NAME if is_from_me else masked',
+      '                f.write(f"[{ts}] {sender}:\\n")',
+      '                if text:',
+      '                    f.write(f"  {text}\\n")',
+      '                else:',
+      '                    f.write("  [no text content]\\n")',
+      attachTxtBlock,
+      '                f.write("\\n")',
+      '    print(f"Saved: {output} ({len(rows)} messages)")',
+      '',
+      'conn.close()',
+      'print("\\nAll done.")',
+      'EOF'
+    ].filter(function(l){ return l !== null; }).join('\n');
+  } else {
+    script = [
+      "python3 << 'EOF'",
+      'import sqlite3, os, csv',
+      '',
+      'contacts = ' + contactsJson,
+      '',
+      'MY_NAME = "' + myname + '"',
+      'outdir = os.path.expanduser("' + outdir + '")',
+      'os.makedirs(outdir, exist_ok=True)',
+      '',
+      maskFn,
+      '',
+      decodeFn,
+      '',
+      'db = os.path.expanduser("~/Library/Messages/chat.db")',
+      'conn = sqlite3.connect(db)',
+      'cur = conn.cursor()',
+      '',
+      'for idx, c in enumerate(contacts):',
+      '    phone = c["phone"]',
+      '    label = c["label"]',
+      '    masked = mask_number(phone, label, idx)',
+      '    safe = (label if label else masked).replace("/", "-").replace(" ", "_")',
+      '    output = os.path.join(outdir, safe + ".csv")',
+      '',
+      '    cur.execute("""',
+      query,
+      '    """, (phone,))',
+      '    rows = cur.fetchall()',
+      '',
+      '    with open(output, "w", newline="", encoding="utf-8") as f:',
+      '        w = csv.writer(f)',
+      '        headers = ["Timestamp", "Sender", "Message"]' + (incAttach ? '\n        headers.append("Attachments")' : ''),
+      '        w.writerow(headers)',
+      '        for row in rows:',
+      '            ts = row[0]',
+      '            is_from_me = row[1]',
+      '            text = get_text(row[2], row[3])',
+      '            sender = MY_NAME if is_from_me else masked',
+      '            out_row = [ts, sender, text]' + attachCsvVal,
+      '            w.writerow(out_row)',
+      '    print(f"Saved: {output} ({len(rows)} messages)")',
+      '',
+      'conn.close()',
+      'print("\\nAll done.")',
+      'EOF'
+    ].join('\n');
+  }
+
+  document.getElementById('script-box').textContent = script;
+  document.getElementById('output-section').classList.add('visible');
+  document.getElementById('output-section').scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+
+function copyScript() {
+  var text = document.getElementById('script-box').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+  });
+}
+
+addRow('', '');
+addRow('', '');
+</script>
+</body>
+</html>
